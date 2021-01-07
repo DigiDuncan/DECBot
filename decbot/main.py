@@ -28,7 +28,7 @@ logger.handlers = []
 logger.propagate = False
 logger.addHandler(dfhandler)
 
-initial_cogs = ["ttscog"]
+initial_cogs = ["tts"]
 initial_extensions = []
 
 discordplus.patch()
