@@ -43,10 +43,7 @@ class Config(AttrDict):
         super(AttrDict, self).__setattr__("_fields", fields)
 
     def load(self):
-        try:
-            configDict = PathDict(toml.load(paths.confpath))
-        except FileNotFoundError as e:
-            raise ConfigError(f"Configuration file not found: {e.filename}")
+        configDict = PathDict(toml.load(paths.confpath))
 
         try:
             for f in self._fields:

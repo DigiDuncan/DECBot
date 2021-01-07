@@ -13,7 +13,7 @@ from digiformatter import styles, logger as digilogger
 import decbot.data
 from decbot import __version__
 from decbot import discordplus
-from decbot.conf import conf
+from decbot.conf import ConfigError, conf
 from decbot.lib import paths
 from decbot.lib.loglevels import BANNER, LOGIN, CMD
 from decbot.lib.utils import truncate
