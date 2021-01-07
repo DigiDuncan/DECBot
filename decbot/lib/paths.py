@@ -13,3 +13,4 @@ def getDataDir():
 # File paths
 datadir = getDataDir()
 confpath = datadir / "decbot.conf"
+tempdir = datadir / "temp"
