@@ -13,7 +13,7 @@ from digiformatter import styles, logger as digilogger
 import decbot.data
 from decbot import __version__
 from decbot import discordplus
-from decbot.conf import ConfigError, conf
+from decbot.conf import conf
 from decbot.lib import paths
 from decbot.lib.loglevels import BANNER, LOGIN, CMD
 from decbot.lib.utils import truncate
@@ -60,7 +60,7 @@ def main():
 
     launchtime = datetime.now()
 
-    bot = Bot(command_prefix = conf.prefix, intents=discord.Intents.all())
+    bot = Bot(command_prefix = conf.prefix)
 
     for extension in initial_extensions:
         bot.load_extension("decbot.extensions." + extension)
