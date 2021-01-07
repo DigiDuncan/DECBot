@@ -16,6 +16,7 @@ class TTSCog(commands.Cog):
     )
     @commands.is_owner()
     async def tts(self, ctx, *, message):
+        message = "[:phoneme on] " + message
         await ctx.send(f"If I were working, I would say: ```\n{message}\n```")
 
 
