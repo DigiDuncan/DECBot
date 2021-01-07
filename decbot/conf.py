@@ -64,7 +64,7 @@ class Config(AttrDict):
 
 
 conf = Config([
-    ConfigField("prefix", "decbot.prefix", default=">"),
+    ConfigField("prefix", "decbot.prefix", default="<"),
     ConfigField("name", "decbot.name", default="DECBot"),
     ConfigField("activity", "decbot.activity", default="with words"),
     ConfigField("authtoken", "discord.authtoken", initdefault="INSERT_BOT_TOKEN_HERE")
