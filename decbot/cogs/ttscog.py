@@ -10,11 +10,13 @@ class TTSCog(commands.Cog):
         self.bot = bot
 
     @commands.command(
-        hidden = True
+        aliases = ["t", "say"],
+        hidden = True,
+        multiline = True
     )
     @commands.is_owner()
-    async def ping(self, ctx, *, message):
-        await ctx.send("PING")
+    async def tts(self, ctx, *, message):
+        await ctx.send(f"If I were working, I would say: ```\n{message}\n```")
 
 
 def setup(bot):
