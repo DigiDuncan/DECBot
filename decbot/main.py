@@ -134,7 +134,8 @@ def main():
     async def on_message_edit(before, after):
         if before.content == after.content:
             return
-        await bot.process_commands(after)
+        # TODO: This is broken with VC stuff.
+        # await bot.process_commands(after)
 
     def on_disconnect():
         logger.error("DECBot has been disconnected from Discord!")
