@@ -12,6 +12,31 @@ from decbot.lib.paths import tempdir
 logger = logging.getLogger("decbot")
 
 
+class DECTalkException(Exception):
+    def __init__(self, code):
+        self.code = code
+
+
+async def talk_to_file(s, filename):
+    # Add phenome support to all messages.
+    s = "[:phoneme on] " + s
+
+    # Make the temp directory if it's not there.
+    try:
+        os.makedirs(tempdir)
+    except OSError:
+        pass
+
+    # Run the say process with the input parameters.
+    with pkg_resources.path(decbot.dectalk, "say.exe") as say:
+        process = await asyncio.create_subprocess_exec(say.resolve(), "-w", (tempdir / f"{filename}.wav").resolve(), s)
+        await process.communicate()
+        await process.wait()
+
+    if process.returncode == 0:
+        raise DECTalkException(process.returncode)
+
+
 class TTSCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -30,36 +55,20 @@ class TTSCog(commands.Cog):
         hidden = True,
         multiline = True
     )
-    async def wav(self, ctx, *, message):
-        # Add phenome support to all messages.
-        message = "[:phoneme on] " + message
-
-        # Make the temp directory if it's not there.
+    async def wav(self, ctx, *, s):
+        """Say something with DECTalk, and send a file!"""
         try:
-            os.makedirs(tempdir)
-        except OSError:
-            pass
-
-        # Run the say process with the input parameters.
-        with pkg_resources.path(decbot.dectalk, "say.exe") as say:
-            process = await asyncio.create_subprocess_exec(say.resolve(), "-w", (tempdir / f"{ctx.message.id}.wav").resolve(), message)
-            await process.communicate()
-            await process.wait()
+            await talk_to_file(s, ctx.message.id)
+        except DECTalkException as e:
+            await ctx.send(f"`say.exe` failed with return code **{e.code}**")
+            return
 
         # If we succeed in running it, send the file.
-        if process.returncode == 0:
-            try:
-                with open(tempdir / f"{ctx.message.id}.wav") as f:
-                    await ctx.send(file = File(f, f"{ctx.message.id}.wav"))
-            except FileNotFoundError:
-                await ctx.send("Uh, it looks like I didn't actually make a file.")
-
-        # If not, say we messed up somewhere.
-        else:
-            await ctx.send(f"`say.exe` failed with return code **{process.returncode}**")
-
-        # Debug message
-        await ctx.send(f"```\n{message}\n```")
+        try:
+            with open(tempdir / f"{ctx.message.id}.wav") as f:
+                await ctx.send(file = File(f, f"{ctx.message.id}.wav"))
+        except FileNotFoundError:
+            await ctx.send("Uh, it looks like I didn't actually make a file.")
 
 
 def setup(bot):
