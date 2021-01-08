@@ -33,7 +33,7 @@ async def talk_to_file(s, filename):
         await process.communicate()
         await process.wait()
 
-    if process.returncode == 0:
+    if process.returncode != 0:
         raise DECTalkException(process.returncode)
 
 
