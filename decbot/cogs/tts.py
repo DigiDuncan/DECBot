@@ -69,11 +69,13 @@ class TTSCog(commands.Cog):
 
         if not os.path.exists(f"{tempdir.resolve()}\\{ctx.message.id}.wav"):
             await ctx.send("Uh, it looks like I didn't actually make a file.")
+            await voiceclient.disconnect()
             return
 
         audio = discord.FFmpegPCMAudio(f"{tempdir.resolve()}\\{ctx.message.id}.wav")
         if audio is None:
             await ctx.send("Failed to load the audio!")
+            await voiceclient.disconnect()
             return
 
         if not voiceclient.is_playing():
