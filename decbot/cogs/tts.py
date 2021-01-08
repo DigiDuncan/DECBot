@@ -4,6 +4,7 @@ import logging
 import os
 
 from discord import File
+import discord
 from discord.ext import commands
 
 import decbot.dectalk
@@ -46,9 +47,27 @@ class TTSCog(commands.Cog):
         hidden = True,
         multiline = True
     )
-    async def tts(self, ctx, *, message):
-        message = "[:phoneme on] " + message
-        await ctx.send(f"If I were working, I would say: ```\n{message}\n```")
+    async def tts(self, ctx, *, s):
+        """Say something with DECTalk in a voice channel!"""
+        if ctx.author.voice is None:
+            await ctx.send("You need to be in a voice channel to use this command!")
+            return
+
+        try:
+            await talk_to_file(s, ctx.message.id)
+        except DECTalkException as e:
+            await ctx.send(f"`say.exe` failed with return code **{e.code}**")
+            return
+
+        vc = discord.utils.get(ctx.bot.voice_clients, guild = ctx.guild)
+        audio = discord.FFmpegPCMAudio(f"{tempdir.resolve()}/{ctx.message.id}.wav")
+        if vc is None:
+            await ctx.send("Failed to get the VC!")
+        if audio is None:
+            await ctx.send("Failed to load the audio!")
+
+        if not vc.is_playing():
+            vc.play(audio)
 
     @commands.command(
         aliases = ["file"],
