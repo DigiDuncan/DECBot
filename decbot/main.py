@@ -1,4 +1,3 @@
-from genericpath import exists
 import importlib.resources as pkg_resources
 import os
 import logging
