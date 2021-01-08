@@ -1,7 +1,6 @@
 import asyncio
 import importlib.resources as pkg_resources
 import logging
-import os
 
 from discord import File
 import discord
@@ -14,8 +13,14 @@ logger = logging.getLogger("decbot")
 
 
 class DECTalkException(Exception):
-    def __init__(self, code):
+    pass
+
+
+class DECTalkReturnCodeException(DECTalkException):
+    def __init__(self, code=None):
         self.code = code
+        message = f"`say.exe` failed with return code **{code}**"
+        super().__init__(message)
 
 
 async def talk_to_file(s, filename):
@@ -23,19 +28,19 @@ async def talk_to_file(s, filename):
     s = "[:phoneme on] " + s
 
     # Make the temp directory if it's not there.
-    try:
-        os.makedirs(tempdir)
-    except OSError:
-        pass
+    tempdir.mkdir(exist_ok=True, parents=True)
 
     # Run the say process with the input parameters.
-    with pkg_resources.path(decbot.dectalk, "say.exe") as say:
-        process = await asyncio.create_subprocess_exec(say.resolve(), "-w", (tempdir / f"{filename}.wav").resolve(), s)
-        await process.communicate()
+    with pkg_resources.path(decbot.dectalk, "say.exe") as say_path:
+        temp_file_path = tempdir / f"{filename}.wav"
+        process = await asyncio.create_subprocess_exec(say_path, "-w", str(temp_file_path), s, cwd=say_path.parent)
         await process.wait()
 
     if process.returncode != 0:
-        raise DECTalkException(process.returncode)
+        raise DECTalkReturnCodeException(f"`say.exe` failed with return code **{process.returncode}**", code=process.returncode)
+    if not temp_file_path.exists():
+        raise DECTalkException(f"File was not created: {temp_file_path}")
+    return temp_file_path
 
 
 class TTSCog(commands.Cog):
@@ -53,35 +58,42 @@ class TTSCog(commands.Cog):
             await ctx.send("You need to be in a voice channel to use this command!")
             return
 
+        # Generate the DECtalk file
         try:
-            await talk_to_file(s, ctx.message.id)
+            temp_file_path = await talk_to_file(s, ctx.message.id)
         except DECTalkException as e:
-            await ctx.send(f"`say.exe` failed with return code **{e.code}**")
+            await ctx.send(e.message)
             return
 
-        vc = ctx.author.voice.channel
-        if vc is None:
-            await ctx.send("Failed to get the VC!")
-            return
-
-        await vc.connect()
-        voiceclient = ctx.guild.voice_client
-
-        if not os.path.exists(f"{tempdir.resolve()}\\{ctx.message.id}.wav"):
-            await ctx.send("Uh, it looks like I didn't actually make a file.")
-            await voiceclient.disconnect()
-            return
-
-        audio = discord.FFmpegPCMAudio(f"{tempdir.resolve()}\\{ctx.message.id}.wav")
+        # Read in the audio
+        audio = discord.FFmpegPCMAudio(temp_file_path)
         if audio is None:
             await ctx.send("Failed to load the audio!")
-            await voiceclient.disconnect()
             return
 
-        if not voiceclient.is_playing():
-            voiceclient.play(audio)
+        # This shouldn't happen
+        if ctx.author.voice.channel is None:
+            await ctx.send("Failed to get the Voice Channel!")
+            return
 
-        await voiceclient.disconnect()
+        # Get the current voice connection, or connect if not in one
+        vc = ctx.guild.voice_client
+        if not vc:
+            vc = await ctx.author.voice.channel.connect()
+
+        # Give up, if the bot is already in a different voice channel
+        if vc.channel != ctx.author.voice.channel:
+            await ctx.send("I'm in another channel.")
+            return
+
+        # Give up, if the bot is currently saying something
+        if vc.is_playing():
+            await ctx.send("Sorry, I'm kinda busy right now.")
+            return
+
+        # Play the message, then disconnect
+        await vc.play_until_done(audio)
+        await vc.disconnect()
 
     @commands.command(
         aliases = ["file"],
@@ -91,14 +103,14 @@ class TTSCog(commands.Cog):
     async def wav(self, ctx, *, s):
         """Say something with DECTalk, and send a file!"""
         try:
-            await talk_to_file(s, ctx.message.id)
+            temp_file_path = await talk_to_file(s, ctx.message.id)
         except DECTalkException as e:
             await ctx.send(f"`say.exe` failed with return code **{e.code}**")
             return
 
         # If we succeed in running it, send the file.
         try:
-            with open(tempdir / f"{ctx.message.id}.wav") as f:
+            with temp_file_path.open("rb") as f:
                 await ctx.send(file = File(f, f"{ctx.message.id}.wav"))
         except FileNotFoundError:
             await ctx.send("Uh, it looks like I didn't actually make a file.")
