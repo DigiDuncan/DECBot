@@ -28,6 +28,12 @@ logger.handlers = []
 logger.propagate = False
 logger.addHandler(dfhandler)
 
+discordlogger = logging.getLogger("discord")
+discordlogger.setLevel(logging.WARN)
+discordlogger.handlers = []
+discordlogger.propagate = False
+discordlogger.addHandler(dfhandler)
+
 initial_cogs = ["admin", "tts"]
 initial_extensions = []
 
