@@ -41,6 +41,8 @@ def setup(bot):
             userMessage = err.formatUserMessage()
             if userMessage is not None:
                 await ctx.send(f"{emojis.warning} {userMessage}")
+        elif isinstance(err, commands.errors.CommandNotFound):
+            pass
         elif isinstance(err, commands.errors.MissingRequiredArgument):
             await ctx.send(f"{emojis.warning} Missing required argument(s) for `{ctx.prefix}{ctx.command}`.")
         elif isinstance(err, commands.errors.ExpectedClosingQuoteError):
