@@ -56,11 +56,13 @@ def main():
         conf.load()
     except FileNotFoundError as e:
         logger.error(f"Configuration file not found: {e.filename}")
+        confpath = Path(e.filename)
         logger.warn("Writing default settings file...")
         default_settings = pkg_resources.read_text(decbot.data, "settings.ini")
-        Path(e.filename).parent.mkdir(parents = True, exist_ok = True)
-        with open(e.filename, "w") as f:
+        confpath.parent.mkdir(parents = True, exist_ok = True)
+        with open(confpath, "w") as f:
             f.write(default_settings)
+        os.startfile(confpath.parent)
         logger.info("Please reload the bot.")
         return
 

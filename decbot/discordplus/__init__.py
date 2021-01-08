@@ -1,4 +1,4 @@
-from decbot.discordplus import bot, command, embed, member, client, messageable, snowflake
+from decbot.discordplus import bot, command, embed, member, client, messageable, snowflake, voiceclient
 
 
 def patch():
@@ -9,3 +9,4 @@ def patch():
     client.patch()
     messageable.patch()
     snowflake.patch()
+    voiceclient.patch()
