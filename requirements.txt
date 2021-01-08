@@ -6,3 +6,4 @@ toml==0.10.0
 digiformatter==0.5.7.2
 arrow==0.15.6
 pytz==2020.4
+pynacl==1.4.0
