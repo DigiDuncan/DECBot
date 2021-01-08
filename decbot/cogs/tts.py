@@ -59,15 +59,27 @@ class TTSCog(commands.Cog):
             await ctx.send(f"`say.exe` failed with return code **{e.code}**")
             return
 
-        vc = discord.utils.get(ctx.bot.voice_clients, guild = ctx.guild)
-        audio = discord.FFmpegPCMAudio(f"{tempdir.resolve()}/{ctx.message.id}.wav")
+        vc = ctx.author.voice.channel
         if vc is None:
             await ctx.send("Failed to get the VC!")
+            return
+
+        await vc.connect()
+        voiceclient = ctx.guild.voice_client
+
+        if not os.path.exists(f"{tempdir.resolve()}\\{ctx.message.id}.wav"):
+            await ctx.send("Uh, it looks like I didn't actually make a file.")
+            return
+
+        audio = discord.FFmpegPCMAudio(f"{tempdir.resolve()}\\{ctx.message.id}.wav")
         if audio is None:
             await ctx.send("Failed to load the audio!")
+            return
 
-        if not vc.is_playing():
-            vc.play(audio)
+        if not voiceclient.is_playing():
+            voiceclient.play(audio)
+
+        await voiceclient.disconnect()
 
     @commands.command(
         aliases = ["file"],
