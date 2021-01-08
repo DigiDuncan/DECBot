@@ -1,6 +1,9 @@
+import importlib.resources as pkg_resources
 from pathlib import Path
 
 import appdirs
+
+import decbot.dectalk
 
 
 def getDataDir():
@@ -14,3 +17,5 @@ def getDataDir():
 datadir = getDataDir()
 confpath = datadir / "decbot.conf"
 tempdir = datadir / "temp"
+with pkg_resources.path(decbot.dectalk, "README.md") as dtreadme:
+    dectalkdir = dtreadme.parent

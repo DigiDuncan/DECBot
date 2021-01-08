@@ -1,3 +1,4 @@
+from genericpath import exists
 import importlib.resources as pkg_resources
 import os
 import logging
@@ -62,6 +63,15 @@ def main():
         with open(e.filename, "w") as f:
             f.write(default_settings)
         logger.info("Please reload the bot.")
+        return
+
+    if not (
+        (paths.dectalkdir / "dectalk.dll").exists()
+        and (paths.dectalkdir / "say.exe").exists()
+        and (paths.dectalkdir / "MSVCRTd.DLL").exists()
+        and (paths.dectalkdir / "dtalk_us.dic").exists()
+    ):
+        logger.error(f"DECTalk installation not found. Please install a full copy of DECTalk 5 in:\n{paths.dectalkdir.resolve()}")
         return
 
     launchtime = datetime.now()
