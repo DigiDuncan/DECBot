@@ -13,7 +13,7 @@ class AdminCog(commands.Cog):
         hidden = True
     )
     @commands.is_owner()
-    async def stop(self, ctx):
+    async def kill(self, ctx):
         """RIP DECBot."""
         logger.critical(f"Help, {ctx.author.display_name} is closing me!")
         await ctx.send("Stopping DECBot. ☠️")
