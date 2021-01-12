@@ -1,6 +1,7 @@
 import asyncio
 import importlib.resources as pkg_resources
 import logging
+import re
 
 from discord import File
 import discord
@@ -27,6 +28,7 @@ class DECTalkReturnCodeException(DECTalkException):
 async def talk_to_file(s, filename):
     # Add phenome support to all messages.
     s = removeCodeBlock(s)
+    s = re.sub(r"<:(.*):\d+>", r"\1", s)  # Make emojis just their name.
     s = s.replace("\n", " [:pp 500][:pp 0] ")
     s = "[:phoneme on] " + s
 
