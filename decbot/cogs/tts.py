@@ -127,13 +127,13 @@ class TTSCog(commands.Cog):
         hidden = True,
         multiline = True
     )
-    async def stop(self, ctx, *, s):
+    async def stop(self, ctx):
         """Shut up shut up shut up shut up"""
         vc = ctx.guild.voice_client
         if not vc:
             await ctx.send("I'm not in a voice channel...")
             return
-        vc.disconnect()
+        await vc.disconnect()
         await ctx.send("...")
 
 
