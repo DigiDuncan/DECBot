@@ -36,10 +36,12 @@ async def talk_to_file(s, filename):
         process = await asyncio.create_subprocess_exec(say_path, "-w", str(temp_file_path), s, cwd=say_path.parent)
         await process.wait()
 
+    # Raise exceptions if we mess up.
     if process.returncode != 0:
         raise DECTalkReturnCodeException(f"`say.exe` failed with return code **{process.returncode}**", code=process.returncode)
     if not temp_file_path.exists():
         raise DECTalkException(f"File was not created: {temp_file_path}")
+
     return temp_file_path
 
 
