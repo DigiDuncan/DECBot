@@ -8,6 +8,7 @@ from discord.ext import commands
 
 import decbot.dectalk
 from decbot.lib.paths import tempdir
+from decbot.lib.utils import removeCodeBlock
 
 logger = logging.getLogger("decbot")
 
@@ -25,6 +26,8 @@ class DECTalkReturnCodeException(DECTalkException):
 
 async def talk_to_file(s, filename):
     # Add phenome support to all messages.
+    s = removeCodeBlock(s)
+    s = s.replace("\n", " [:pp 500][:pp 0] ")
     s = "[:phoneme on] " + s
 
     # Make the temp directory if it's not there.
@@ -114,6 +117,20 @@ class TTSCog(commands.Cog):
                 await ctx.send(file = File(f, f"{ctx.message.id}.wav"))
         except FileNotFoundError:
             await ctx.send("Uh, it looks like I didn't actually make a file.")
+
+    @commands.command(
+        aliases = ["shutup"],
+        hidden = True,
+        multiline = True
+    )
+    async def stop(self, ctx, *, s):
+        """Shut up shut up shut up shut up"""
+        vc = ctx.guild.voice_client
+        if not vc:
+            await ctx.send("I'm not in a voice channel...")
+            return
+        vc.disconnect()
+        await ctx.send("...")
 
 
 def setup(bot):
