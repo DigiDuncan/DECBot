@@ -117,7 +117,7 @@ def main():
 
     @bot.event
     async def on_command(ctx):
-        guild = truncate(ctx.guild.name, 20) if hasattr(ctx, "guild") else "DM"
+        guild = truncate(ctx.guild.name, 20) if (hasattr(ctx, "guild") and ctx.guild is not None) else "DM"
         logger.log(CMD, f"G {guild}, U {ctx.message.author.name}: {ctx.message.content}")
 
     @bot.event
