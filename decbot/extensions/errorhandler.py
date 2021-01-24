@@ -1,6 +1,7 @@
 import logging
 import sys
 
+import discord.errors
 from discord.ext import commands
 
 from decbot.lib import errors, utils
@@ -55,6 +56,8 @@ def setup(bot):
             await ctx.send(f"{emojis.error} You do not have permission to run this command.")
         elif isinstance(err, commands.CommandOnCooldown):
             await ctx.send(f"{emojis.info} You're using that command too fast! Try again in a moment.")
+        elif isinstance(err, discord.errors.ClientException):
+            await ctx.send(f"{emojis.error} {err.args[0]}")
         else:
             # Default command error handling
             await ctx.send(f"{emojis.error} Something went wrong.")
