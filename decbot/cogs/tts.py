@@ -70,7 +70,7 @@ class TTSCog(commands.Cog):
 
         # Generate the DECtalk file
         try:
-            temp_file_path = await talk_to_file(ctx.message.clean_content.remove_prefix(f"{ctx.bot.prefix}{ctx.invoked_with} "), ctx.message.id)
+            temp_file_path = await talk_to_file(ctx.message.clean_content.removeprefix(f"{ctx.bot.prefix}{ctx.invoked_with} "), ctx.message.id)
         except DECTalkException as e:
             await ctx.send(e.message)
             return
@@ -112,7 +112,7 @@ class TTSCog(commands.Cog):
     async def wav(self, ctx, *, s):
         """Say something with DECTalk, and send a file!"""
         try:
-            temp_file_path = await talk_to_file(s, ctx.message.id)
+            temp_file_path = await talk_to_file(ctx.message.clean_content.removeprefix(f"{ctx.bot.prefix}{ctx.invoked_with} "), ctx.message.id)
         except DECTalkException as e:
             await ctx.send(f"`say.exe` failed with return code **{e.code}**")
             return
