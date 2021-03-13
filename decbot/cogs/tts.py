@@ -25,12 +25,15 @@ class DECTalkReturnCodeException(DECTalkException):
         super().__init__(message)
 
 
-async def talk_to_file(s, filename):
-    # Add phenome support to all messages.
+def clean_text(s):
     s = removeCodeBlock(s)
     s = re.sub(r"<a?:(.*?):\d+?>", r"\1 ", s)  # Make emojis just their name.
     s = s.replace("\n", " [:pp 500][:pp 0] ")
     s = "[:phoneme on] " + s
+
+
+async def talk_to_file(s, filename):
+    s = clean_text(s)
 
     # Make the temp directory if it's not there.
     tempdir.mkdir(exist_ok=True, parents=True)
@@ -67,7 +70,7 @@ class TTSCog(commands.Cog):
 
         # Generate the DECtalk file
         try:
-            temp_file_path = await talk_to_file(s, ctx.message.id)
+            temp_file_path = await talk_to_file(ctx.message.clean_content.remove_prefix(f"{ctx.bot.prefix}{ctx.invoked_with} "), ctx.message.id)
         except DECTalkException as e:
             await ctx.send(e.message)
             return
