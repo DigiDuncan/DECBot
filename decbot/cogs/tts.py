@@ -6,7 +6,6 @@ import re
 from discord import File
 import discord
 from discord.ext import commands
-from discord.ext.commands.core import command
 
 import decbot.dectalk
 from decbot.lib.paths import tempdir
@@ -31,6 +30,7 @@ def clean_text(s):
     s = re.sub(r"<a?:(.*?):\d+?>", r"\1 ", s)  # Make emojis just their name.
     s = s.replace("\n", " [:pp 500][:pp 0] ")
     s = "[:phoneme on] " + s
+    return s
 
 
 async def talk_to_file(s, filename):
