@@ -6,6 +6,7 @@ import re
 from discord import File
 import discord
 from discord.ext import commands
+from discord.ext.commands.core import command
 
 import decbot.dectalk
 from decbot.lib.paths import tempdir
@@ -59,7 +60,6 @@ class TTSCog(commands.Cog):
 
     @commands.command(
         aliases = ["t", "say"],
-        hidden = True,
         multiline = True
     )
     async def tts(self, ctx, *, s):
@@ -107,7 +107,6 @@ class TTSCog(commands.Cog):
 
     @commands.command(
         aliases = ["file"],
-        hidden = True,
         multiline = True
     )
     async def wav(self, ctx, *, s):
@@ -124,6 +123,12 @@ class TTSCog(commands.Cog):
                 await ctx.send(file = File(f, f"{ctx.message.id}.wav"))
         except FileNotFoundError:
             await ctx.send("Uh, it looks like I didn't actually make a file.")
+
+    @commands.command(
+        aliases = ["guide"]
+    )
+    async def manual(self, ctx):
+        await ctx.send("https://manualzz.com/doc/7326177/dectalk-5.01-e1-user-guide")
 
     @commands.command(
         aliases = ["shutup"],
