@@ -247,7 +247,7 @@ def minmax(first, second) -> tuple:
     return small, big
 
 
-def removeCodeBlock(s) -> str:
+def remove_code_block(s) -> str:
     re_codeblock = re.compile(r"^\s*```(?:python)?(.*)```\s*$", re.DOTALL)
     s_nocodeblock = re.sub(re_codeblock, r"\1", s)
     if s_nocodeblock != s:

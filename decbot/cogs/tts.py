@@ -1,57 +1,13 @@
-import asyncio
-import importlib.resources as pkg_resources
 import logging
-import re
 
-from discord import File
 import discord
+from discord import File
 from discord.ext import commands
 
-import decbot.dectalk
-from decbot.lib.paths import tempdir
-from decbot.lib.utils import removeCodeBlock
+from decbot.lib.decutils import talk_to_file, DECTalkException
+
 
 logger = logging.getLogger("decbot")
-
-
-class DECTalkException(Exception):
-    pass
-
-
-class DECTalkReturnCodeException(DECTalkException):
-    def __init__(self, code=None):
-        self.code = code
-        message = f"`say.exe` failed with return code **{code}**"
-        super().__init__(message)
-
-
-def clean_text(s):
-    s = removeCodeBlock(s)
-    s = re.sub(r"<a?:(.*?):\d+?>", r"\1 ", s)  # Make emojis just their name.
-    s = s.replace("\n", " [:pp 500][:pp 0] ")
-    s = "[:phoneme on] " + s
-    return s
-
-
-async def talk_to_file(s, filename):
-    s = clean_text(s)
-
-    # Make the temp directory if it's not there.
-    tempdir.mkdir(exist_ok=True, parents=True)
-
-    # Run the say process with the input parameters.
-    with pkg_resources.path(decbot.dectalk, "say.exe") as say_path:
-        temp_file_path = tempdir / f"{filename}.wav"
-        process = await asyncio.create_subprocess_exec(say_path, "-w", str(temp_file_path), s, cwd=say_path.parent)
-        await process.wait()
-
-    # Raise exceptions if we mess up.
-    if process.returncode != 0:
-        raise DECTalkReturnCodeException(f"`say.exe` failed with return code **{process.returncode}**", code=process.returncode)
-    if not temp_file_path.exists():
-        raise DECTalkException(f"File was not created: {temp_file_path}")
-
-    return temp_file_path
 
 
 class TTSCog(commands.Cog):
@@ -59,7 +15,7 @@ class TTSCog(commands.Cog):
         self.bot = bot
 
     @commands.command(
-        aliases = ["t", "say"],
+        aliases = ["t", "say", "dec"],
         multiline = True
     )
     async def tts(self, ctx, *, s):
