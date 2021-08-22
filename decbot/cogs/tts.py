@@ -115,21 +115,28 @@ class TTSCog(commands.Cog):
 
         for q in discons:
             vc = self.bot.get_guild(q.guildid).voice_client
-            await vc.disconnect()
+            if vc:
+                await vc.disconnect()
 
         if not qs:
             return
         try:
             for q in qs:
                 vc = self.bot.get_guild(q.guildid).voice_client
-                if not vc:
+                correct_channel = self.bot.get_guild(q.guildid).get_channel(q.vcid)
+                if vc and vc.channel != correct_channel:
+                    while q.talking:
+                        pass
+                if vc is None:
                     vc = await self.bot.get_guild(q.guildid).get_channel(q.vcid).connect()
 
                 audio = await q.next_audio()
 
                 # Play the message
+                q.talking = True
                 await vc.play_until_done(audio)
                 q.audio_ended = arrow.now().timestamp
+                q.talking = False
 
         except Exception as err:
             logger.error(formatTraceback(err))

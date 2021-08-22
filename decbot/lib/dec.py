@@ -23,6 +23,7 @@ class DECQueue:
         self.queue = deque([])
         self.last_id: int = None
         self.audio_ended = arrow.now().timestamp
+        self.talking = False
 
     @property
     def is_empty(self):
