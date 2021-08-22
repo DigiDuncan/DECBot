@@ -1,6 +1,7 @@
 from collections import deque
 from dataclasses import dataclass
 from typing import Union
+import arrow
 
 import discord
 from decbot.lib.decutils import talk_to_file, NoAudioException
@@ -21,7 +22,7 @@ class DECQueue:
 
         self.queue = deque([])
         self.last_id: int = None
-        self.audio_ended: int = None
+        self.audio_ended = arrow.now().timestamp
 
     @property
     def is_empty(self):
@@ -39,7 +40,7 @@ class DECQueue:
     async def next_audio(self):
         if m := self._next():
             message = m.message
-            if self.last_id == m.discordid:
+            if self.last_id != m.discordid:
                 message = f"{m.name} says: " + message
             temp_file_path = await talk_to_file(message, m.messageid)
             audio = discord.FFmpegPCMAudio(temp_file_path)

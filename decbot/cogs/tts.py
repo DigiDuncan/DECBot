@@ -20,6 +20,10 @@ current_vc: Dict[int, int]
 class TTSCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.queueTask.start()
+
+    def cog_unload(self):
+        self.queueTask.cancel()
 
     @commands.command(
         aliases = ["t", "say", "dec"],
@@ -51,8 +55,16 @@ class TTSCog(commands.Cog):
             await ctx.send("Failed to get the Voice Channel!")
             return
 
-        queues[(ctx.guild.id, ctx.message.channel.id)].add_to_queue(
-            DECMEssage(ctx.author.nickname, ctx.author.id, ctx.message.id,
+        vcid = ctx.message.author.voice.channel.id
+        # Make queues if we need to
+        try:
+            queue = queues[(ctx.guild.id, vcid)]
+        except KeyError:
+            queues[(ctx.guild.id, vcid)] = DECQueue(ctx.guild.id, vcid)
+            queue = queues[(ctx.guild.id, vcid)]
+
+        queue.add_to_queue(
+            DECMEssage(ctx.author.display_name, ctx.author.id, ctx.message.id,
                        message_text)
         )
 
@@ -99,6 +111,12 @@ class TTSCog(commands.Cog):
     async def queueTask(self):
         """Queue checker"""
         qs = [q for qc, q in queues.items() if not q.is_empty]
+        discons = [q for qc, q in queues.items() if q.audio_ended + 30 < arrow.now().timestamp]
+
+        for q in discons:
+            vc = self.bot.get_guild(q.guildid).voice_client
+            await vc.disconnect()
+
         if not qs:
             return
         try:
@@ -107,7 +125,7 @@ class TTSCog(commands.Cog):
                 if not vc:
                     vc = await self.bot.get_guild(q.guildid).get_channel(q.vcid).connect()
 
-                audio = q.next_audio()
+                audio = await q.next_audio()
 
                 # Play the message
                 await vc.play_until_done(audio)
@@ -115,12 +133,6 @@ class TTSCog(commands.Cog):
 
         except Exception as err:
             logger.error(formatTraceback(err))
-
-        discons = [q for qc, q in queues.items() if q.audio_ended + 30 < arrow.now().timestamp]
-
-        for q in discons:
-            vc = self.bot.get_guild(q.guildid).voice_client
-            await vc.disconnect()
 
     @queueTask.before_loop
     async def before_queueTask(self):
