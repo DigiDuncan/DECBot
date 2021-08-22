@@ -1,13 +1,20 @@
 import logging
+from typing import Dict, Tuple
 
+import arrow
 import discord
 from discord import File
-from discord.ext import commands
+from discord.ext import commands, tasks
 
+from decbot.lib.dec import DECMEssage, DECQueue
 from decbot.lib.decutils import talk_to_file, DECTalkException
+from decbot.lib.utils import formatTraceback
 
 
 logger = logging.getLogger("decbot")
+
+queues: Dict[Tuple[int, int], DECQueue] = {}
+current_vc: Dict[int, int]
 
 
 class TTSCog(commands.Cog):
@@ -24,9 +31,11 @@ class TTSCog(commands.Cog):
             await ctx.send("You need to be in a voice channel to use this command!")
             return
 
+        message_text = ctx.message.clean_content.removeprefix(f"{ctx.prefix}{ctx.invoked_with} ")
+
         # Generate the DECtalk file
         try:
-            temp_file_path = await talk_to_file(ctx.message.clean_content.removeprefix(f"{ctx.prefix}{ctx.invoked_with} "), ctx.message.id)
+            temp_file_path = await talk_to_file(message_text, ctx.message.id)
         except DECTalkException as e:
             await ctx.send(e.message)
             return
@@ -42,24 +51,10 @@ class TTSCog(commands.Cog):
             await ctx.send("Failed to get the Voice Channel!")
             return
 
-        # Get the current voice connection, or connect if not in one
-        vc = ctx.guild.voice_client
-        if not vc:
-            vc = await ctx.author.voice.channel.connect()
-
-        # Give up, if the bot is already in a different voice channel
-        if vc.channel != ctx.author.voice.channel:
-            await ctx.send("I'm in another channel.")
-            return
-
-        # Give up, if the bot is currently saying something
-        if vc.is_playing():
-            await ctx.send("Sorry, I'm kinda busy right now.")
-            return
-
-        # Play the message, then disconnect
-        await vc.play_until_done(audio)
-        await vc.disconnect()
+        queues[(ctx.guild.id, ctx.message.channel.id)].add_to_queue(
+            DECMEssage(ctx.author.nickname, ctx.author.id, ctx.message.id,
+                       message_text)
+        )
 
     @commands.command(
         aliases = ["file"],
@@ -99,6 +94,37 @@ class TTSCog(commands.Cog):
             return
         await vc.disconnect()
         await ctx.send("...")
+
+    @tasks.loop(seconds=1)
+    async def queueTask(self):
+        """Queue checker"""
+        qs = [q for qc, q in queues.items() if not q.is_empty]
+        if not qs:
+            return
+        try:
+            for q in qs:
+                vc = self.bot.get_guild(q.guildid).voice_client
+                if not vc:
+                    vc = await self.bot.get_guild(q.guildid).get_channel(q.vcid).connect()
+
+                audio = q.next_audio()
+
+                # Play the message
+                await vc.play_until_done(audio)
+                q.audio_ended = arrow.now().timestamp
+
+        except Exception as err:
+            logger.error(formatTraceback(err))
+
+        discons = [q for qc, q in queues.items() if q.audio_ended + 30 < arrow.now().timestamp]
+
+        for q in discons:
+            vc = self.bot.get_guild(q.guildid).voice_client
+            await vc.disconnect()
+
+    @queueTask.before_loop
+    async def before_queueTask(self):
+        await self.bot.wait_until_ready()
 
 
 def setup(bot):

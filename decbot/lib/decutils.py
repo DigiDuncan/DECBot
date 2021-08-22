@@ -18,6 +18,12 @@ class DECTalkReturnCodeException(DECTalkException):
         super().__init__(message)
 
 
+class NoAudioException(DECTalkException):
+    def __init__(self):
+        message = "Audio failed to load!"
+        super().__init__(message)
+
+
 def clean_text(s):
     s = remove_code_block(s)
     s = re.sub(r"<a?:(.*?):\d+?>", r"\1 ", s)  # Make emojis just their name.
