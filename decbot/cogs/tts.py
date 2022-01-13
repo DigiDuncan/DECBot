@@ -118,7 +118,7 @@ class TTSCog(commands.Cog):
     async def queueTask(self):
         """Queue checker"""
         qs = [q for qc, q in queues.items() if not q.is_empty]
-        discons = [q for qc, q in queues.items() if q.audio_ended + 30 < arrow.now().timestamp]
+        discons = [q for qc, q in queues.items() if q.audio_ended + 120 < arrow.now().timestamp]
 
         for q in discons:
             vc = self.bot.get_guild(q.guildid).voice_client
