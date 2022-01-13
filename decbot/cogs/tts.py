@@ -37,6 +37,12 @@ class TTSCog(commands.Cog):
 
         message_text = ctx.message.clean_content.removeprefix(f"{ctx.prefix}{ctx.invoked_with} ")
         message_author = clean_nickname(ctx.author.display_name)
+        if ctx.message.reference:
+            try:
+                other_message = await ctx.message.channel.fetch_message(ctx.message.reference.message_id)
+                message_author += ", replying to " + clean_nickname(other_message.author.display_name) + ","
+            except (discord.NotFound, discord.Forbidden, discord.HTTPException):
+                pass
 
         # Generate the DECtalk file
         try:

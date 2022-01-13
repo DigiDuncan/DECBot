@@ -86,6 +86,12 @@ class AdminCog(commands.Cog):
 
         message_text = message.clean_content
         message_author = clean_nickname(message.author.display_name)
+        if message.reference:
+            try:
+                other_message = await message.channel.fetch_message(message.reference.message_id)
+                message_author += " replying to " + clean_nickname(other_message.author.display_name)
+            except (discord.NotFound, discord.Forbidden, discord.HTTPException):
+                pass
 
         # Generate the DECtalk file
         try:
