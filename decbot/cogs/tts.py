@@ -7,7 +7,7 @@ from discord import File
 from discord.ext import commands, tasks
 
 from decbot.lib.dec import DECMEssage, DECQueue
-from decbot.lib.decutils import talk_to_file, DECTalkException
+from decbot.lib.decutils import talk_to_file, DECTalkException, clean_nickname
 from decbot.lib.utils import formatTraceback
 
 
@@ -36,6 +36,7 @@ class TTSCog(commands.Cog):
             return
 
         message_text = ctx.message.clean_content.removeprefix(f"{ctx.prefix}{ctx.invoked_with} ")
+        message_author = clean_nickname(ctx.author.display_name)
 
         # Generate the DECtalk file
         try:
@@ -64,7 +65,7 @@ class TTSCog(commands.Cog):
             queue = queues[(ctx.guild.id, vcid)]
 
         queue.add_to_queue(
-            DECMEssage(ctx.author.display_name, ctx.author.id, ctx.message.id,
+            DECMEssage(message_author, ctx.author.id, ctx.message.id,
                        message_text)
         )
 

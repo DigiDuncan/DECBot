@@ -17,5 +17,7 @@ def getDataDir():
 datadir = getDataDir()
 confpath = datadir / "decbot.conf"
 tempdir = datadir / "temp"
+channelspath = datadir / "channels.txt"
+vcpath = datadir / "vc.txt"
 with pkg_resources.path(decbot.dectalk, "README.md") as dtreadme:
     dectalkdir = dtreadme.parent

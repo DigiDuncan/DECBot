@@ -34,7 +34,7 @@ discordlogger.handlers = []
 discordlogger.propagate = False
 discordlogger.addHandler(dfhandler)
 
-initial_cogs = ["admin", "tts"]
+initial_cogs = ["admin", "tts", "channel"]
 initial_extensions = ["errorhandler"]
 
 discordplus.patch()

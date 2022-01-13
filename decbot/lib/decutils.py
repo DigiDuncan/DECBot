@@ -32,6 +32,10 @@ def clean_text(s):
     return s
 
 
+def clean_nickname(nick: str):
+    return re.sub(R"\[.*\]", "", nick)
+
+
 async def talk_to_file(s, filename):
     s = clean_text(s)
 
