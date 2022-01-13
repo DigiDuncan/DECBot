@@ -89,7 +89,7 @@ class AdminCog(commands.Cog):
         if message.reference:
             try:
                 other_message = await message.channel.fetch_message(message.reference.message_id)
-                message_author += " replying to " + clean_nickname(other_message.author.display_name)
+                message_author += ", replying to " + clean_nickname(other_message.author.display_name) + ","
             except (discord.NotFound, discord.Forbidden, discord.HTTPException):
                 pass
 
