@@ -27,7 +27,7 @@ def is_mod():
     return commands.check(predicate)
 
 
-class AdminCog(commands.Cog):
+class ChannelCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -74,7 +74,10 @@ class AdminCog(commands.Cog):
         if message.author.id == message.guild.me.id:
             return
 
-        if message.content.startswith("<"):
+        if message.content.startswith("<") or message.content.startswith("?"):
+            return
+
+        if message.content == "":
             return
 
         v = message.author.voice
@@ -125,4 +128,4 @@ class AdminCog(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(AdminCog(bot))
+    bot.add_cog(ChannelCog(bot))

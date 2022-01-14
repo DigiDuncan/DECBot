@@ -21,7 +21,7 @@ class DECQueue:
         self.vcid = vcid
 
         self.queue = deque([])
-        self.last_id: int = None
+        self.last_name: str = None
         self.audio_ended = arrow.now().timestamp
         self.talking = False
 
@@ -41,12 +41,12 @@ class DECQueue:
     async def next_audio(self):
         if m := self._next():
             message = m.message
-            if self.last_id != m.discordid:
+            if self.last_name != m.name:
                 message = f"{m.name} says: " + message
             temp_file_path = await talk_to_file(message, m.messageid)
             audio = discord.FFmpegPCMAudio(temp_file_path)
             if audio is None:
                 raise NoAudioException
-            self.last_id = m.discordid
+            self.last_name = m.name
             return audio
         return None

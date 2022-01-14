@@ -27,6 +27,7 @@ class NoAudioException(DECTalkException):
 def clean_text(s):
     s = remove_code_block(s)
     s = re.sub(r"<a?:(.*?):\d+?>", r"\1 ", s)  # Make emojis just their name.
+    s = re.sub(r"\*", "", s)  # No *
     s = s.replace("\n", " [:pp 500][:pp 0] ")
     s = "[:phoneme on] " + s
     return s
