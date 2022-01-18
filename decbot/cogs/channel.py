@@ -74,11 +74,15 @@ class ChannelCog(commands.Cog):
         if message.author.id == message.guild.me.id:
             return
 
-        if message.content.startswith("<") or message.content.startswith("?"):
+        if message.clean_content.startswith("?"):
             return
 
         if message.content == "":
             return
+
+        for command in [c.name for c in self.bot.commands]:
+            if message.clean_content.startswith("<" + command):
+                return
 
         v = message.author.voice
         if v is None:
