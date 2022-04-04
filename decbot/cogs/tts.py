@@ -46,7 +46,7 @@ class TTSCog(commands.Cog):
 
         # Generate the DECtalk file
         try:
-            temp_file_path = await talk_to_file(message_text, ctx.message.id)
+            temp_file_path = await talk_to_file(message_text, ctx.author.id, ctx.message.id)
         except DECTalkException as e:
             await ctx.send(e.message)
             return
@@ -82,7 +82,7 @@ class TTSCog(commands.Cog):
     async def wav(self, ctx, *, s):
         """Say something with DECTalk, and send a file!"""
         try:
-            temp_file_path = await talk_to_file(ctx.message.clean_content.removeprefix(f"{ctx.prefix}{ctx.invoked_with} "), ctx.message.id)
+            temp_file_path = await talk_to_file(ctx.message.clean_content.removeprefix(f"{ctx.prefix}{ctx.invoked_with} "), 0, ctx.message.id)
         except DECTalkException as e:
             await ctx.send(f"`say.exe` failed with return code **{e.code}**")
             return
@@ -118,7 +118,7 @@ class TTSCog(commands.Cog):
     async def queueTask(self):
         """Queue checker"""
         qs = [q for qc, q in queues.items() if not q.is_empty]
-        discons = [q for qc, q in queues.items() if q.audio_ended + 120 < arrow.now().timestamp]
+        discons = [q for qc, q in queues.items() if q.audio_ended + 120 < arrow.now().timestamp()]
 
         for q in discons:
             vc = self.bot.get_guild(q.guildid).voice_client
@@ -142,7 +142,7 @@ class TTSCog(commands.Cog):
                 # Play the message
                 q.talking = True
                 await vc.play_until_done(audio)
-                q.audio_ended = arrow.now().timestamp
+                q.audio_ended = arrow.now().timestamp()
                 q.talking = False
 
         except Exception as err:

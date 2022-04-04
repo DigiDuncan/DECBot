@@ -5,7 +5,7 @@ from discord.ext import commands
 
 from decbot.cogs.tts import queues
 from decbot.lib.dec import DECMEssage, DECQueue
-from decbot.lib.decutils import DECTalkException, clean_nickname, talk_to_file
+from decbot.lib.decutils import DECTalkException, clean_nickname, is_mod, talk_to_file
 from decbot.lib.filelist import FileDict, UniqueFileList
 from decbot.lib.paths import channelspath, vcpath
 
@@ -13,18 +13,6 @@ logger = logging.getLogger("decbot")
 
 current_vcs = FileDict(vcpath)
 listening_channels = UniqueFileList(channelspath)
-
-
-def is_mod():
-    async def predicate(ctx):
-        author = ctx.author
-        modness = False
-        if await ctx.bot.is_owner(author):
-            modness = True
-        elif author.permissions_in(ctx.channel).manage_guild:
-            modness = True
-        return modness
-    return commands.check(predicate)
 
 
 class ChannelCog(commands.Cog):
@@ -102,7 +90,7 @@ class ChannelCog(commands.Cog):
 
         # Generate the DECtalk file
         try:
-            temp_file_path = await talk_to_file(message_text, message.id)
+            temp_file_path = await talk_to_file(message_text, message.author.id, message.id)
         except DECTalkException as e:
             await message.channel.send(e.message)
             return
