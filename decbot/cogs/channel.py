@@ -68,6 +68,10 @@ class ChannelCog(commands.Cog):
         if message.content == "":
             return
 
+        if "http" in message.content:
+            await message.channel.send("Looks you tried to make me say a link! Don't. ._.")
+            return
+
         for command in [c.name for c in self.bot.commands]:
             if message.clean_content.startswith("<" + command):
                 return
