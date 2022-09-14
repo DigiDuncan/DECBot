@@ -29,6 +29,7 @@ class LOLCog(commands.Cog):
             # Sleep while audio is playing.
             while vc.is_playing():
                 time.sleep(.1)
+            time.sleep(3)
             await vc.disconnect()
         else:
             await ctx.send(str(ctx.author.name) + "is not in a channel.")

@@ -8,6 +8,7 @@ from decbot.lib.dec import DECMEssage, DECQueue
 from decbot.lib.decutils import DECTalkException, clean_nickname, is_mod, talk_to_file
 from decbot.lib.filelist import FileDict, UniqueFileList
 from decbot.lib.paths import channelspath, vcpath
+from decbot.lib.voices import namesdb
 
 logger = logging.getLogger("decbot")
 
@@ -69,7 +70,6 @@ class ChannelCog(commands.Cog):
             return
 
         if "http" in message.content:
-            await message.channel.send("Looks you tried to make me say a link! Don't. ._.")
             return
 
         for command in [c.name for c in self.bot.commands]:
@@ -84,11 +84,13 @@ class ChannelCog(commands.Cog):
             vc = v.channel
 
         message_text = message.clean_content
-        message_author = clean_nickname(message.author.display_name)
+        m_nick = namesdb.get_name(message.author.id)
+        message_author = clean_nickname(message.author.display_name) if m_nick is None else m_nick
         if message.reference:
             try:
                 other_message = await message.channel.fetch_message(message.reference.message_id)
-                message_author += ", replying to " + clean_nickname(other_message.author.display_name) + ","
+                other_name = namesdb.get_name(other_message.author.id) or clean_nickname(other_message.author.display_name)
+                message_author += ", replying to " + other_name + ","
             except (discord.NotFound, discord.Forbidden, discord.HTTPException):
                 pass
 

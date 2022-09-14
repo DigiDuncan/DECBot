@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from typing import Union
 import arrow
 
+from decbot.lib.voices import namesdb
+
 import discord
 from decbot.lib.decutils import talk_to_file, NoAudioException
 
@@ -20,7 +22,7 @@ class DECQueue:
         self.guildid = guildid
         self.vcid = vcid
 
-        self.queue = deque([])
+        self.queue = []
         self.last_name: str = None
         self.audio_ended = arrow.now().timestamp()
         self.talking = False
@@ -32,9 +34,12 @@ class DECQueue:
     def add_to_queue(self, message: DECMEssage):
         self.queue.append(message)
 
+    def clear(self):
+        self.queue = []
+
     def _next(self) -> Union[DECMEssage, None]:
         try:
-            return self.queue.pop()
+            return self.queue.pop(0)
         except IndexError:
             return None
 

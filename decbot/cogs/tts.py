@@ -6,8 +6,10 @@ import discord
 from discord import File
 from discord.ext import commands, tasks
 
+from decbot.lib.voices import namesdb
+
 from decbot.lib.dec import DECMEssage, DECQueue
-from decbot.lib.decutils import talk_to_file, DECTalkException, clean_nickname
+from decbot.lib.decutils import is_mod, talk_to_file, DECTalkException, clean_nickname
 from decbot.lib.utils import formatTraceback
 
 
@@ -36,11 +38,14 @@ class TTSCog(commands.Cog):
             return
 
         message_text = ctx.message.clean_content.removeprefix(f"{ctx.prefix}{ctx.invoked_with} ")
-        message_author = clean_nickname(ctx.author.display_name)
+        nick = namesdb.get_name(ctx.author.id)
+        message_author = clean_nickname(ctx.author.display_name) if nick is None else nick
         if ctx.message.reference:
             try:
                 other_message = await ctx.message.channel.fetch_message(ctx.message.reference.message_id)
-                message_author += ", replying to " + clean_nickname(other_message.author.display_name) + ","
+                other_nick = namesdb.get_name(other_message.author.id)
+                on = clean_nickname(other_message.author.display_name) if other_nick is None else other_nick
+                message_author += ", replying to " + on + ","
             except (discord.NotFound, discord.Forbidden, discord.HTTPException):
                 pass
 
@@ -101,9 +106,7 @@ class TTSCog(commands.Cog):
         await ctx.send("https://manualzz.com/doc/7326177/dectalk-5.01-e1-user-guide")
 
     @commands.command(
-        aliases = ["shutup"],
-        hidden = True,
-        multiline = True
+        aliases = ["shutup"]
     )
     async def stop(self, ctx):
         """Shut up shut up shut up shut up"""
@@ -114,11 +117,32 @@ class TTSCog(commands.Cog):
         await vc.disconnect()
         await ctx.send("...")
 
+    @commands.command(
+        aliases = ["clear"],
+        hidden = True
+    )
+    @is_mod()
+    async def clearqueue(self, ctx):
+        """Shut up shut up shut up shut up"""
+        vc = ctx.guild.voice_client
+        if vc:
+            await vc.disconnect()
+        if ctx.author.voice.channel is None:
+            await ctx.send("Failed to get the Voice Channel!")
+            return
+        vcid = ctx.message.author.voice.channel.id
+        try:
+            queue = queues[(ctx.guild.id, vcid)]
+        except KeyError:
+            await ctx.send("No queue exists for this channel.")
+        queue.clear()
+        await ctx.send("Queue cleared.")
+
     @tasks.loop(seconds=1)
     async def queueTask(self):
         """Queue checker"""
-        qs = [q for qc, q in queues.items() if not q.is_empty]
-        discons = [q for qc, q in queues.items() if q.audio_ended + 120 < arrow.now().timestamp()]
+        qs = [q for q in queues.values() if not q.is_empty]
+        discons = [q for q in queues.values() if q.audio_ended + 120 < arrow.now().timestamp()]
 
         for q in discons:
             vc = self.bot.get_guild(q.guildid).voice_client

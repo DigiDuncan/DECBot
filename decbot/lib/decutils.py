@@ -10,7 +10,7 @@ from emoji import demojize
 import decbot.dectalk
 from decbot.lib.paths import tempdir
 from decbot.lib.utils import remove_code_block
-from decbot.lib.voices import voicesdb
+from decbot.lib.voices import voicesdb, namesdb
 
 
 class DECTalkException(Exception):
