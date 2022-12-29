@@ -22,14 +22,14 @@ class VoicesCog(commands.Cog):
     @commands.command()
     async def clearvoice(self, ctx: commands.Context):
         """Clear your voice."""
-        voicesdb.set_voice(ctx.author.id, "")
+        voicesdb.reset_voice(ctx.author.id)
         await ctx.send("Voice cleared.")
 
     @commands.command()
     @is_mod()
     async def resetvoice(self, ctx: commands.Context, *, member: discord.Member):
         """Clear your voice."""
-        voicesdb.set_voice(member.id, "")
+        voicesdb.reset_voice(member.id)
         await ctx.send(f"Voice cleared for {member.display_name}.")
 
     @commands.command()
@@ -41,14 +41,14 @@ class VoicesCog(commands.Cog):
     @commands.command()
     async def clearname(self, ctx: commands.Context):
         """Clear your name."""
-        namesdb.set_name(ctx.author.id, "")
+        namesdb.reset_name(ctx.author.id)
         await ctx.send("Name cleared.")
 
     @commands.command()
     @is_mod()
     async def resetname(self, ctx: commands.Context, *, member: discord.Member):
         """Clear your name."""
-        namesdb.set_name(member.id, "")
+        namesdb.reset_name(member.id)
         await ctx.send(f"Name cleared for {member.display_name}.")
 
 

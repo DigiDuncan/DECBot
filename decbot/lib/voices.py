@@ -15,6 +15,10 @@ class VoicesDB:
     def get_voice(self, id: int) -> str:
         return self.dict[id] if id in self.dict else ""
 
+    def reset_voice(self, id: int) -> str:
+        self.dict.pop(id)
+        self.save()
+
     def save(self):
         with open(voicespath, "w") as f:
             json.dump({str(k): v for k, v in self.dict.items()}, f)
@@ -29,6 +33,10 @@ class NamesDB:
 
     def set_name(self, id: int, name: str):
         self.dict[id] = name
+        self.save()
+
+    def reset_name(self, id: int):
+        self.dict.popitem(id)
         self.save()
 
     def get_name(self, id: int) -> str:

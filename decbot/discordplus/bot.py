@@ -20,7 +20,7 @@ def find_one(iterable):
 
 
 async def process_commands(self, message):
-    if message.author.bot:
+    if message.author.bot and message.author.id != 1055993189640704020:
         return
 
     contexts = []

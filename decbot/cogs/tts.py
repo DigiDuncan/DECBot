@@ -48,6 +48,17 @@ class TTSCog(commands.Cog):
                 message_author += ", replying to " + on + ","
             except (discord.NotFound, discord.Forbidden, discord.HTTPException):
                 pass
+        if ctx.message.author.id == 403269334065217547:  # 4Bakers
+            if message_text.startswith(">>"):  # Iris
+                if ctx.guild.get_member(1055993189640704020):
+                    return
+                else:
+                    message_lines = message_text.split("\n")
+                    new_lines = []
+                    for line in message_lines:
+                        new_lines.append(line.removeprefix(">>"))
+                    message_text = "\n".join(new_lines)
+                    message_author = "Iris"
 
         # Generate the DECtalk file
         try:

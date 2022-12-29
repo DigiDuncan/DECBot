@@ -63,7 +63,7 @@ class ChannelCog(commands.Cog):
         if message.author.id == message.guild.me.id:
             return
 
-        if message.clean_content.startswith("?"):
+        if message.clean_content.startswith("?"):  # The Librarian
             return
 
         if message.content == "":
@@ -76,14 +76,18 @@ class ChannelCog(commands.Cog):
             if message.clean_content.startswith("<" + command):
                 return
 
-        v = message.author.voice
+        try:
+            v = message.author.voice
+        except AttributeError:
+            return
+
         if v is None:
             vci = current_vcs.setdefault(message.guild.id, message.guild.voice_channels[0].id)
             vc = message.guild.get_channel(vci)
         else:
             vc = v.channel
 
-        message_text = message.clean_content
+        message_text = str(message.clean_content)
         m_nick = namesdb.get_name(message.author.id)
         message_author = clean_nickname(message.author.display_name) if m_nick is None else m_nick
         if message.reference:
@@ -93,6 +97,17 @@ class ChannelCog(commands.Cog):
                 message_author += ", replying to " + other_name + ","
             except (discord.NotFound, discord.Forbidden, discord.HTTPException):
                 pass
+        if message.author.id == 403269334065217547:  # 4Bakers
+            if message_text.startswith(">>"):  # Iris
+                if message.guild.get_member(1055993189640704020):
+                    return
+                else:
+                    message_lines = message_text.split("\n")
+                    new_lines = []
+                    for line in message_lines:
+                        new_lines.append(line.removeprefix(">>"))
+                    message_text = "\n".join(new_lines)
+                    message_author = "Iris"
 
         # Generate the DECtalk file
         try:
