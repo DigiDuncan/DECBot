@@ -10,7 +10,7 @@ from decbot.lib.constants import emojis
 logger = logging.getLogger("decbot")
 
 
-def setup(bot):
+async def setup(bot):
     @bot.event
     async def on_command_error(ctx, error):
         # Get actual error

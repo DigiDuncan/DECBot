@@ -1,9 +1,6 @@
-from collections import deque
 from dataclasses import dataclass
 from typing import Union
 import arrow
-
-from decbot.lib.voices import namesdb
 
 import discord
 from decbot.lib.decutils import talk_to_file, NoAudioException

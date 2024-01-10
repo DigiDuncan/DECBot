@@ -2,6 +2,7 @@ import json
 
 from decbot.lib.paths import voicespath, namespath
 
+
 class VoicesDB:
     def __init__(self):
         with open(voicespath, "r") as f:
@@ -23,7 +24,9 @@ class VoicesDB:
         with open(voicespath, "w") as f:
             json.dump({str(k): v for k, v in self.dict.items()}, f)
 
+
 voicesdb = VoicesDB()
+
 
 class NamesDB:
     def __init__(self):
@@ -36,7 +39,7 @@ class NamesDB:
         self.save()
 
     def reset_name(self, id: int):
-        self.dict.popitem(id)
+        self.dict.pop(id)
         self.save()
 
     def get_name(self, id: int) -> str:
@@ -45,5 +48,6 @@ class NamesDB:
     def save(self):
         with open(namespath, "w") as f:
             json.dump({str(k): v for k, v in self.dict.items()}, f)
+
 
 namesdb = NamesDB()

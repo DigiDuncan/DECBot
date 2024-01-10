@@ -34,6 +34,12 @@ class LOLCog(commands.Cog):
         else:
             await ctx.send(str(ctx.author.name) + "is not in a channel.")
 
+    # @commands.command()
+    # async def thething(self, ctx: commands.Context):
+    #     """It's doing the thing!."""
+    #     logger.error("Ah fuck, I did the thing!")
+    #     await ctx.send("Logged incidence of the thing.")
 
-def setup(bot):
-    bot.add_cog(LOLCog(bot))
+
+async def setup(bot):
+    await bot.add_cog(LOLCog(bot))

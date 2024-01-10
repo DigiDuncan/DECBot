@@ -1,16 +1,14 @@
 import asyncio
 import importlib.resources as pkg_resources
 import re
-import unicodedata
 
-import discord
 from discord.ext import commands
 from emoji import demojize
 
 import decbot.dectalk
 from decbot.lib.paths import tempdir
 from decbot.lib.utils import remove_code_block
-from decbot.lib.voices import voicesdb, namesdb
+from decbot.lib.voices import voicesdb
 
 
 class DECTalkException(Exception):
@@ -32,11 +30,15 @@ class NoAudioException(DECTalkException):
 
 def clean_text(s, prefix = ""):
     s = remove_code_block(s)
-    s = re.sub(r"<a?:(.*?):\d+?>", r"\1 ", s)  # Make Discord emojis just their name.
+    s = re.sub(r"(\|\|.+\|\|)[,.\?!]*", lambda x: f"[:t 440,{len(x.group(1)) * 50}] ", s)
+    s = re.sub(r"(█+)[,.\?!]*", lambda x: f"[:t 440,{len(x.group(1)) * 100}] ", s)
+    s = re.sub(r"((<a:k1:1073106773457776640>|<a:k2:1073106775450058762>|<a:k3:1073106776507023370>|<a:k4:1073106777513664512>)+)", lambda x: f"[:t 440,{len(x.group(1)) * 8}] ", s)
+    s = re.sub(r"<a?:(.*?):\d+?>", lambda x: x.group(1).replace("_", " "), s)  # Make Discord emojis just their name.
     s = demojize(s, delimiters=("(", " emoji)"), use_aliases=True)  # Make unicode emojis just their name.
     s = re.sub(r"\(.* emoji\)", lambda x: x.group().replace("_", " ").removeprefix("(").removesuffix(")"), s)  # remove _ from emoji names
     s = re.sub(r"\*", "", s)  # No *
     s = s.replace("\n", " [:pp 333][:pp 0] ")
+    s = s.replace("[REDACTED]", "[:t 440,500]").replace("[DATA EXPUNGED]", "[:t 440,500]")
     s = "[:phoneme on] [:rate 150] " + prefix + s
     return s
 

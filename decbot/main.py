@@ -1,6 +1,7 @@
 import importlib.resources as pkg_resources
 import os
 import logging
+from logging import DEBUG
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -23,7 +24,7 @@ dfhandler = digilogger.DigiFormatterHandler()
 dfhandler.setLevel(CMD)
 
 logger = logging.getLogger("decbot")
-logger.setLevel(CMD)
+logger.setLevel(DEBUG)
 logger.handlers = []
 logger.propagate = False
 logger.addHandler(dfhandler)
@@ -31,7 +32,7 @@ logger.addHandler(dfhandler)
 discordlogger = logging.getLogger("discord")
 discordlogger.setLevel(logging.WARN)
 discordlogger.handlers = []
-discordlogger.propagate = False
+discordlogger.propagate = True
 discordlogger.addHandler(dfhandler)
 
 initial_cogs = ["admin", "tts", "channel", "lol", "voices"]
@@ -77,12 +78,14 @@ def main():
 
     launchtime = datetime.now()
 
-    bot = Bot(command_prefix = conf.prefix)
+    bot = Bot(command_prefix = conf.prefix, intents = discord.Intents.all())
 
-    for extension in initial_extensions:
-        bot.load_extension("decbot.extensions." + extension)
-    for cog in initial_cogs:
-        bot.load_extension("decbot.cogs." + cog)
+    @bot.event
+    async def setup_hook():
+        for extension in initial_extensions:
+            await bot.load_extension("decbot.extensions." + extension)
+        for cog in initial_cogs:
+            await bot.load_extension("decbot.cogs." + cog)
 
     @bot.event
     async def on_first_ready():
@@ -109,7 +112,7 @@ def main():
         logger.info(f"Prefix: {conf.prefix}")
         launchfinishtime = datetime.now()
         elapsed = launchfinishtime - launchtime
-        logger.debug(f"DECBot launched in {round((elapsed.total_seconds() * 1000), 3)} milliseconds.\n")
+        logger.info(f"DECBot launched in {round((elapsed.total_seconds() * 1000), 3)} milliseconds.\n")
 
     @bot.event
     async def on_reconnect_ready():

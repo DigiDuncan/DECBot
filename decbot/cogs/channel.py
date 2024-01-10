@@ -51,7 +51,7 @@ class ChannelCog(commands.Cog):
     async def setvc(self, ctx):
         """Set the currently active VC."""
         if ctx.author.voice:
-            current_vcs[ctx.guild.id] = ctx.author.voice.id
+            current_vcs[ctx.guild.id] = ctx.author.voice.channel.id
         else:
             await ctx.send("You aren't in a voice channel!")
 
@@ -99,7 +99,7 @@ class ChannelCog(commands.Cog):
                 pass
         if message.author.id == 403269334065217547:  # 4Bakers
             if message_text.startswith(">>"):  # Iris
-                if message.guild.get_member(1055993189640704020):
+                if message.guild.id in [1041121893425631312, 733861887078563861]:
                     return
                 else:
                     message_lines = message_text.split("\n")
@@ -133,12 +133,14 @@ class ChannelCog(commands.Cog):
             queue = queues[(message.guild.id, vcid)]
         except KeyError:
             queues[(message.guild.id, vcid)] = DECQueue(message.guild.id, vcid)
+            logger.info(f"Created queue {(message.guild.id, vcid)}")
             queue = queues[(message.guild.id, vcid)]
 
         queue.add_to_queue(
             DECMEssage(message_author, message.author.id, message.id,
                        message_text))
+        logger.info(f"Adding message {message.id} to queue {(message.guild.id, vcid)}")
 
 
-def setup(bot):
-    bot.add_cog(ChannelCog(bot))
+async def setup(bot):
+    await bot.add_cog(ChannelCog(bot))

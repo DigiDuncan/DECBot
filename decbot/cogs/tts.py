@@ -10,6 +10,7 @@ from decbot.lib.voices import namesdb
 
 from decbot.lib.dec import DECMEssage, DECQueue
 from decbot.lib.decutils import is_mod, talk_to_file, DECTalkException, clean_nickname
+from decbot.lib.paths import byepath
 from decbot.lib.utils import formatTraceback
 
 
@@ -21,7 +22,7 @@ current_vc: Dict[int, int]
 
 class TTSCog(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: discord.Client = bot
         self.queueTask.start()
 
     def cog_unload(self):
@@ -31,7 +32,7 @@ class TTSCog(commands.Cog):
         aliases = ["t", "say", "dec"],
         multiline = True
     )
-    async def tts(self, ctx, *, s):
+    async def tts(self, ctx: commands.Context, *, s):
         """Say something with DECTalk in a voice channel!"""
         if ctx.author.voice is None:
             await ctx.send("You need to be in a voice channel to use this command!")
@@ -84,6 +85,7 @@ class TTSCog(commands.Cog):
             queue = queues[(ctx.guild.id, vcid)]
         except KeyError:
             queues[(ctx.guild.id, vcid)] = DECQueue(ctx.guild.id, vcid)
+            logger.info(f"Created queue {(ctx.guild.id, vcid)}")
             queue = queues[(ctx.guild.id, vcid)]
 
         queue.add_to_queue(
@@ -158,7 +160,10 @@ class TTSCog(commands.Cog):
         for q in discons:
             vc = self.bot.get_guild(q.guildid).voice_client
             if vc:
+                bye = discord.FFmpegPCMAudio(byepath)
+                await vc.play_until_done(bye)
                 await vc.disconnect()
+                logger.info(f"Disconnecting from queue {(q.guildid, q.vcid)}")
 
         if not qs:
             return
@@ -171,13 +176,16 @@ class TTSCog(commands.Cog):
                         pass
                 if vc is None:
                     vc = await self.bot.get_guild(q.guildid).get_channel(q.vcid).connect()
+                    logger.info("Connected!")
 
                 audio = await q.next_audio()
 
                 # Play the message
                 q.talking = True
+                logger.info(f"Playing audio in queue {(q.guildid, q.vcid)}")
                 await vc.play_until_done(audio)
                 q.audio_ended = arrow.now().timestamp()
+                logger.info(f"Audio ended in queue {(q.guildid, q.vcid)}")
                 q.talking = False
 
         except Exception as err:
@@ -188,5 +196,5 @@ class TTSCog(commands.Cog):
         await self.bot.wait_until_ready()
 
 
-def setup(bot):
-    bot.add_cog(TTSCog(bot))
+async def setup(bot):
+    await bot.add_cog(TTSCog(bot))

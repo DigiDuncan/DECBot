@@ -52,5 +52,5 @@ class VoicesCog(commands.Cog):
         await ctx.send(f"Name cleared for {member.display_name}.")
 
 
-def setup(bot):
-    bot.add_cog(VoicesCog(bot))
+async def setup(bot):
+    await bot.add_cog(VoicesCog(bot))

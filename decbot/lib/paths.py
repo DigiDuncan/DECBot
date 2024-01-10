@@ -21,5 +21,6 @@ channelspath = datadir / "channels.txt"
 vcpath = datadir / "vc.txt"
 voicespath = datadir / "voices.json"
 namespath = datadir / "names.json"
+byepath = datadir / "bye.wav"
 with pkg_resources.path(decbot.dectalk, "README.md") as dtreadme:
     dectalkdir = dtreadme.parent
