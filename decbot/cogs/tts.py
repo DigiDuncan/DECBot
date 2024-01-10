@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Tuple
+from typing import Dict
 
 import arrow
 import discord
@@ -16,7 +16,7 @@ from decbot.lib.utils import formatTraceback
 
 logger = logging.getLogger("decbot")
 
-queues: Dict[Tuple[int, int], DECQueue] = {}
+queues: Dict[int, DECQueue] = {}
 current_vc: Dict[int, int]
 
 
@@ -82,15 +82,15 @@ class TTSCog(commands.Cog):
         vcid = ctx.message.author.voice.channel.id
         # Make queues if we need to
         try:
-            queue = queues[(ctx.guild.id, vcid)]
+            queue = queues[ctx.guild.id]
         except KeyError:
-            queues[(ctx.guild.id, vcid)] = DECQueue(ctx.guild.id, vcid)
-            logger.info(f"Created queue {(ctx.guild.id, vcid)}")
-            queue = queues[(ctx.guild.id, vcid)]
+            queues[ctx.guild.id] = DECQueue(ctx.guild.id)
+            logger.info(f"Created queue {ctx.guild.id}")
+            queue = queues[ctx.guild.id]
 
         queue.add_to_queue(
             DECMEssage(message_author, ctx.author.id, ctx.message.id,
-                       message_text)
+                       message_text, vcid)
         )
 
     @commands.command(
@@ -143,9 +143,8 @@ class TTSCog(commands.Cog):
         if ctx.author.voice.channel is None:
             await ctx.send("Failed to get the Voice Channel!")
             return
-        vcid = ctx.message.author.voice.channel.id
         try:
-            queue = queues[(ctx.guild.id, vcid)]
+            queue = queues[ctx.guild.id]
         except KeyError:
             await ctx.send("No queue exists for this channel.")
         queue.clear()
@@ -163,29 +162,31 @@ class TTSCog(commands.Cog):
                 bye = discord.FFmpegPCMAudio(byepath)
                 await vc.play_until_done(bye)
                 await vc.disconnect()
-                logger.info(f"Disconnecting from queue {(q.guildid, q.vcid)}")
+                logger.info(f"Disconnecting from queue {q.guildid}")
 
         if not qs:
             return
         try:
             for q in qs:
                 vc = self.bot.get_guild(q.guildid).voice_client
-                correct_channel = self.bot.get_guild(q.guildid).get_channel(q.vcid)
-                if vc and vc.channel != correct_channel:
-                    while q.talking:
-                        pass
+                current_message = q.queue[0]
+                channel = self.bot.get_guild(q.guildid).get_channel(current_message.vcid)
                 if vc is None:
-                    vc = await self.bot.get_guild(q.guildid).get_channel(q.vcid).connect()
+                    vc = await self.bot.get_guild(q.guildid).get_channel(current_message.vcid).connect()
                     logger.info("Connected!")
+                if vc.channel != channel:
+                    await vc.disconnect()
+                    await channel.connect()
+                    logger.info("Switched channels!")
 
                 audio = await q.next_audio()
 
                 # Play the message
                 q.talking = True
-                logger.info(f"Playing audio in queue {(q.guildid, q.vcid)}")
+                logger.info(f"Playing audio in queue {q.guildid}")
                 await vc.play_until_done(audio)
                 q.audio_ended = arrow.now().timestamp()
-                logger.info(f"Audio ended in queue {(q.guildid, q.vcid)}")
+                logger.info(f"Audio ended in queue {q.guildid}")
                 q.talking = False
 
         except Exception as err:

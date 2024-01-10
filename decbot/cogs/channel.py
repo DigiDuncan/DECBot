@@ -130,15 +130,15 @@ class ChannelCog(commands.Cog):
         vcid = vc.id
         # Make queues if we need to
         try:
-            queue = queues[(message.guild.id, vcid)]
+            queue = queues[message.guild.id]
         except KeyError:
-            queues[(message.guild.id, vcid)] = DECQueue(message.guild.id, vcid)
-            logger.info(f"Created queue {(message.guild.id, vcid)}")
-            queue = queues[(message.guild.id, vcid)]
+            queues[message.guild.id] = DECQueue(message.guild.id)
+            logger.info(f"Created queue {message.guild.id}")
+            queue = queues[message.guild.id]
 
         queue.add_to_queue(
             DECMEssage(message_author, message.author.id, message.id,
-                       message_text))
+                       message_text, vcid))
         logger.info(f"Adding message {message.id} to queue {(message.guild.id, vcid)}")
 
 

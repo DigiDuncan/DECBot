@@ -12,14 +12,14 @@ class DECMEssage:
     discordid: int
     messageid: int
     message: str
+    vcid: int
 
 
 class DECQueue:
-    def __init__(self, guildid, vcid) -> None:
+    def __init__(self, guildid) -> None:
         self.guildid = guildid
-        self.vcid = vcid
 
-        self.queue = []
+        self.queue: list[DECMEssage] = []
         self.last_name: str = None
         self.audio_ended = arrow.now().timestamp()
         self.talking = False
