@@ -17,3 +17,5 @@ decbot/dectalk/dectalk.dll
 decbot/dectalk/dtalk_us.dic
 decbot/dectalk/MSVCRTd.DLL
 decbot/dectalk/say.exe
+
+decbot/data/settings.ini
