@@ -57,13 +57,25 @@ class ChannelCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if f"{message.guild.id}:{message.channel.id}" not in listening_channels:
-            return
-
         if message.author.id == message.guild.me.id:
             return
 
-        if message.clean_content.startswith("?"):  # The Librarian
+        # Trying to deal with the Suki issue
+        bot_name = None
+        if message.author.bot and message.author.id != 1055993189640704020:
+            bot_name = message.author.name if namesdb.get_name(message.author.id) is None else namesdb.get_name(message.author.id)
+            async for m in message.channel.history(limit=10, before = message.created_at):
+                message.author = m.author
+                break
+        # IRIS AAA
+        elif message.author.id == 1055993189640704020:
+            bot_name = "Iris"
+            message.author = message.guild.get_member(403269334065217547)  # it's baker
+
+        if f"{message.guild.id}:{message.channel.id}" not in listening_channels:
+            return
+
+        if message.clean_content.startswith("?"):  # Suki
             return
 
         if message.content == "":
@@ -88,7 +100,7 @@ class ChannelCog(commands.Cog):
             vc = v.channel
 
         message_text = str(message.clean_content)
-        m_nick = namesdb.get_name(message.author.id)
+        m_nick = namesdb.get_name(message.author.id) if bot_name is None else bot_name
         message_author = clean_nickname(message.author.display_name) if m_nick is None else m_nick
         if message.reference:
             try:

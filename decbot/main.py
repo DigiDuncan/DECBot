@@ -1,7 +1,7 @@
 import importlib.resources as pkg_resources
 import os
 import logging
-from logging import DEBUG
+from logging import DEBUG, WARN
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -19,9 +19,8 @@ from decbot.lib import paths
 from decbot.lib.loglevels import BANNER, LOGIN, CMD
 from decbot.lib.utils import truncate
 
-logging.basicConfig(level=CMD)
+logging.basicConfig(level=WARN)
 dfhandler = digilogger.DigiFormatterHandler()
-dfhandler.setLevel(CMD)
 
 logger = logging.getLogger("decbot")
 logger.setLevel(DEBUG)
@@ -29,11 +28,12 @@ logger.handlers = []
 logger.propagate = False
 logger.addHandler(dfhandler)
 
-discordlogger = logging.getLogger("discord")
-discordlogger.setLevel(logging.WARN)
-discordlogger.handlers = []
-discordlogger.propagate = True
-discordlogger.addHandler(dfhandler)
+for log in ["discord", "discord.player", "discord.voice_client", "discord.client", "discord.gateway"]:
+    discordlogger = logging.getLogger(log)
+    discordlogger.setLevel(logging.WARN)
+    discordlogger.handlers = []
+    discordlogger.propagate = True
+    discordlogger.addHandler(dfhandler)
 
 initial_cogs = ["admin", "tts", "channel", "lol", "voices"]
 initial_extensions = ["errorhandler"]
