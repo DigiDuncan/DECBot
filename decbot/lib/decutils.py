@@ -37,9 +37,11 @@ def clean_text(s, prefix = ""):
     s = demojize(s, delimiters=("(", " emoji)"), use_aliases=True)  # Make unicode emojis just their name.
     s = re.sub(r"\(.* emoji\)", lambda x: x.group().replace("_", " ").removeprefix("(").removesuffix(")"), s)  # remove _ from emoji names
     s = re.sub(r"\*", "", s)  # No *
-    s = s.replace("\n", " [:pp 333][:pp 0] ")
+    s = s.replace("\n", " [:pp 250][:pp 0] ")
     s = s.replace("[REDACTED]", "[:t 440,500]").replace("[DATA EXPUNGED]", "[:t 440,500]")
-    s = "[:phoneme on] [:rate 150] " + prefix + s
+    s = s.replace("ඞ", "among us")
+    s = s.replace("£", "pounds")
+    s = "[:phoneme on] [:rate 200] " + prefix + s
     return s
 
 

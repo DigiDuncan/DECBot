@@ -78,15 +78,14 @@ class ChannelCog(commands.Cog):
         if message.clean_content.startswith("?"):  # Suki
             return
 
+        if message.clean_content.startswith("<") and not message.clean_content.startswith("<:") and not message.clean_content.startswith("<a:"):  # no read please
+            return
+
         if message.content == "":
             return
 
         if "http" in message.content:
             return
-
-        for command in [c.name for c in self.bot.commands]:
-            if message.clean_content.startswith("<" + command):
-                return
 
         try:
             v = message.author.voice
@@ -111,7 +110,7 @@ class ChannelCog(commands.Cog):
                 pass
         if message.author.id == 403269334065217547:  # 4Bakers
             if message_text.startswith(">>"):  # Iris
-                if message.guild.id in [1041121893425631312, 733861887078563861]:
+                if message.guild.id in [1041121893425631312, 733861887078563861, 1164580827443765309]:  # servers with the Iris bot in them
                     return
                 else:
                     message_lines = message_text.split("\n")
