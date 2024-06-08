@@ -35,7 +35,7 @@ for log in ["discord", "discord.player", "discord.voice_client", "discord.client
     discordlogger.propagate = True
     discordlogger.addHandler(dfhandler)
 
-initial_cogs = ["admin", "tts", "channel", "lol", "voices"]
+initial_cogs = ["admin", "tts", "channel", "lol", "voices", "replacement"]
 initial_extensions = ["errorhandler"]
 
 discordplus.patch()

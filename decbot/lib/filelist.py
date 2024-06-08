@@ -80,11 +80,11 @@ class FileDict:
         self.file = file
         self._dict: dict[str, Any] = {}
 
-        with open(file, "r+") as f:
+        with open(file, "r+", encoding = "utf-8") as f:
             self._dict = json.load(f)
 
     def _save(self):
-        with open(self.file, "w+") as f:
+        with open(self.file, "w+", encoding = "utf-8") as f:
             json.dump(self._dict, f)
 
     def clear(self):

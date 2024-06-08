@@ -1,4 +1,5 @@
 import logging
+import time
 from typing import Dict
 
 import arrow
@@ -154,13 +155,14 @@ class TTSCog(commands.Cog):
     async def queueTask(self):
         """Queue checker"""
         qs = [q for q in queues.values() if not q.is_empty]
-        discons = [q for q in queues.values() if q.audio_ended + 120 < arrow.now().timestamp()]
+        discons = [q for q in queues.values() if q.audio_ended + 300 < arrow.now().timestamp()]
 
         for q in discons:
             vc = self.bot.get_guild(q.guildid).voice_client
             if vc:
                 bye = discord.FFmpegPCMAudio(byepath)
                 await vc.play_until_done(bye)
+                time.sleep(1)
                 await vc.disconnect()
                 logger.info(f"Disconnecting from queue {q.guildid}")
 

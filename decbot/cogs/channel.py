@@ -93,6 +93,7 @@ class ChannelCog(commands.Cog):
             return
 
         if v is None:
+            return
             vci = current_vcs.setdefault(message.guild.id, message.guild.voice_channels[0].id)
             vc = message.guild.get_channel(vci)
         else:

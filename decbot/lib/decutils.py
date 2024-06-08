@@ -6,7 +6,8 @@ from discord.ext import commands
 from emoji import demojize
 
 import decbot.dectalk
-from decbot.lib.paths import tempdir
+from decbot.lib.filelist import FileDict
+from decbot.lib.paths import tempdir, replacementspath
 from decbot.lib.utils import remove_code_block
 from decbot.lib.voices import voicesdb
 
@@ -28,6 +29,15 @@ class NoAudioException(DECTalkException):
         super().__init__(message)
 
 
+replacements = FileDict(replacementspath)
+
+def perform_replacements(s):
+    s = s.lower()
+    for k, v in replacements.items():
+        s = s.replace(k.lower(), v)
+    return s
+
+
 def clean_text(s, prefix = ""):
     s = remove_code_block(s)
     s = re.sub(r"(\|\|.+\|\|)[,.\?!]*", lambda x: f"[:t 440,{len(x.group(1)) * 50}] ", s)
@@ -38,9 +48,9 @@ def clean_text(s, prefix = ""):
     s = re.sub(r"\(.* emoji\)", lambda x: x.group().replace("_", " ").removeprefix("(").removesuffix(")"), s)  # remove _ from emoji names
     s = re.sub(r"\*", "", s)  # No *
     s = s.replace("\n", " [:pp 250][:pp 0] ")
-    s = s.replace("[REDACTED]", "[:t 440,500]").replace("[DATA EXPUNGED]", "[:t 440,500]")
-    s = s.replace("ඞ", "among us")
-    s = s.replace("£", "pounds")
+    
+    s = perform_replacements(s)
+
     s = "[:phoneme on] [:rate 200] " + prefix + s
     return s
 
