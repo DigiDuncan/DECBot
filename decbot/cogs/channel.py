@@ -18,7 +18,7 @@ listening_channels = UniqueFileList(channelspath)
 
 class ChannelCog(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: discord.Client = bot
 
     @commands.command()
     @is_mod()
@@ -99,7 +99,11 @@ class ChannelCog(commands.Cog):
         else:
             vc = v.channel
 
-        message_text = str(message.clean_content)
+        if message.stickers:
+            print(f"Found stickers: {message.stickers}")
+            message_text = message.stickers[0].name
+        else:
+            message_text = message.clean_content
         m_nick = namesdb.get_name(message.author.id) if bot_name is None else bot_name
         message_author = clean_nickname(message.author.display_name) if m_nick is None else m_nick
         if message.reference:
